@@ -68,7 +68,7 @@ public class WordNet {
 
     // distance between nounA and nounB (defined below)
     public int distance(String nounA, String nounB) {
-        wordGraph.
+        wordGraph.dfg
     }
 
     // a synset (second field of synsets.txt) that is the common ancestor of nounA and nounB
