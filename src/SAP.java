@@ -1,26 +1,32 @@
 import edu.princeton.cs.algs4.BreadthFirstDirectedPaths;
 import edu.princeton.cs.algs4.Digraph;
+import edu.princeton.cs.algs4.In;
 import edu.princeton.cs.algs4.RedBlackBST;
+import edu.princeton.cs.algs4.StdIn;
+import edu.princeton.cs.algs4.StdOut;
 
 public class SAP {
 
     private BreadthFirstDirectedPaths bfsv;
     private BreadthFirstDirectedPaths bfsw;
-    private Digraph G;
-    private final RedBlackBST<Integer, Integer> sapS; //single source vertex
-    private final RedBlackBST<Integer, Integer> sapM; //multiple source vertexes
+    private final Digraph G;
+    private RedBlackBST<Integer, Integer> sapS; //single source vertex
+    private RedBlackBST<Integer, Integer> sapM; //multiple source vertexes
     // constructor takes a digraph (not necessarily a DAG)
     public SAP(Digraph G) {
+        if(G == null) {
+            throw new java.lang.IllegalArgumentException();
+        }
         this.G = new Digraph(G); //deep copy to make digraph immutable
-        sapS = new RedBlackBST<>();
-        sapM = new RedBlackBST<>();
+ 
     }
 
     // length of shortest ancestral path between v and w; -1 if no such path
     public int length(int v, int w) {
+        sapS = new RedBlackBST<>();
         bfsv = new BreadthFirstDirectedPaths(G, v);
         bfsw = new BreadthFirstDirectedPaths(G, w);
-        for(int i = 0; i < G.E() ; i++) {
+        for(int i = 0; i < G.V() ; i++) {
             if(bfsv.hasPathTo(i) && bfsw.hasPathTo(i)) {
                 sapS.put(bfsv.distTo(i) + bfsw.distTo(i), i);
             }            
@@ -39,9 +45,16 @@ public class SAP {
 
     // length of shortest ancestral path between any vertex in v and any vertex in w; -1 if no such path
     public int length(Iterable<Integer> v, Iterable<Integer> w) {
+        if(v == null || w == null) {
+            throw new java.lang.IllegalArgumentException();
+        }
+        if(!v.iterator().hasNext() || !w.iterator().hasNext()) {
+            throw new java.lang.IllegalArgumentException();
+        }
+        sapM = new RedBlackBST<>();
         bfsv = new BreadthFirstDirectedPaths(G, v);
         bfsw = new BreadthFirstDirectedPaths(G, w);
-        for(int i = 0; i < G.E() ; i++) {
+        for(int i = 0; i < G.V() ; i++) {
             if(bfsv.hasPathTo(i) && bfsw.hasPathTo(i)) {
                 sapM.put(bfsv.distTo(i) + bfsw.distTo(i), i);
             }            
@@ -52,6 +65,12 @@ public class SAP {
 
     // a common ancestor that participates in shortest ancestral path; -1 if no such path
     public int ancestor(Iterable<Integer> v, Iterable<Integer> w) {
+        if(v == null || w == null) {
+            throw new java.lang.IllegalArgumentException();
+        }
+        if(!v.iterator().hasNext() || !w.iterator().hasNext()) {
+            throw new java.lang.IllegalArgumentException();
+        }
         int temp = length(v, w);
         if(temp == -1) {
             return -1;
@@ -60,6 +79,15 @@ public class SAP {
     
     // do unit testing of this class
     public static void main(String[] args) {
-        
+        In in = new In("testing\\digraph1.txt");
+        Digraph G = new Digraph(in);
+        SAP sap = new SAP(G);
+        while (!StdIn.isEmpty()) {
+            int v = StdIn.readInt();
+            int w = StdIn.readInt();
+            int length   = sap.length(v, w);
+            int ancestor = sap.ancestor(v, w);
+            StdOut.printf("length = %d, ancestor = %d\n", length, ancestor);
+        }
     }
 }
